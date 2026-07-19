@@ -137,7 +137,16 @@ public class AbilityListener
         switch (type) {
             case FIRE: {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, duration, 0));
-                p.sendMessage(String.valueOf(ChatColor.GOLD) + "Fire Resistance applied!");
+                if (level == 2) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.GOLD) + "Fire Resistance and Speed applied!");
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 0));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.GOLD) + "Fire Resistance, Speed, and Regeneration applied!");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.GOLD) + "Fire Resistance applied!");
+                }
                 break;
             }
             case WATER: {
@@ -146,18 +155,45 @@ public class AbilityListener
                 double baseVel = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "left_click", "velocity_multiplier_base", 2.0);
                 double perLevelVel = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "left_click", "velocity_multiplier_per_level", 0.5);
                 p.setVelocity(p.getLocation().getDirection().multiply(baseVel + (level * perLevelVel)));
-                p.sendMessage(String.valueOf(ChatColor.AQUA) + "Aqua Dash!");
+                
+                if (level == 2) {
+                    p.setFireTicks(0);
+                    p.sendMessage(String.valueOf(ChatColor.AQUA) + "Aqua Dash! Extinguished fires.");
+                } else if (level >= 3) {
+                    p.setFireTicks(0);
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.AQUA) + "Aqua Dash! Extinguished fires and gained Conduit Power.");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.AQUA) + "Aqua Dash!");
+                }
                 break;
             }
             case MINE: {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, duration, level - 1));
-                p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Haste applied!");
+                if (level == 2) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Haste II and Speed applied!");
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 0));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Haste III, Speed, and Night Vision applied!");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Haste applied!");
+                }
                 break;
             }
             case DRAGON: {
                 p.setAllowFlight(true);
                 p.setFlying(true);
-                p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Flight enabled temporarily!");
+                
+                if (level == 2) {
+                    p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Flight enabled (Level 2)! Will gain Slow Falling on exit.");
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 1));
+                    p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Flight and Speed II enabled (Level 3)! Will gain Slow Falling on exit.");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Flight enabled temporarily!");
+                }
 
                 // Auto-disable flight
                 plugin.getServer().getScheduler().runTaskLater((org.bukkit.plugin.Plugin) plugin, () -> {
@@ -168,6 +204,10 @@ public class AbilityListener
                                 p.setAllowFlight(false);
                                 p.setFlying(false);
                                 p.sendMessage(String.valueOf(ChatColor.DARK_RED) + "Flight disabled!");
+                                if (level >= 2) {
+                                    p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 100, 0));
+                                    p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Slow Falling applied.");
+                                }
                             }
                         }, 60L);
                     }
@@ -176,12 +216,17 @@ public class AbilityListener
             }
             case PVP: {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, level - 1));
-                p.sendMessage(String.valueOf(ChatColor.RED) + "Strength applied!");
+                p.sendMessage(String.valueOf(ChatColor.RED) + "Strength " + (level == 1 ? "I" : (level == 2 ? "II" : "III")) + " applied!");
                 break;
             }
             case WARDEN: {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, level - 1));
-                p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Regeneration applied!");
+                if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Regeneration II and Resistance I applied!");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Regeneration " + (level == 1 ? "I" : "II") + " applied!");
+                }
                 break;
             }
             case HONOR: {
@@ -189,7 +234,16 @@ public class AbilityListener
                 p.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, 1));
                 p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, 1));
                 p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 1));
-                p.sendMessage(String.valueOf(ChatColor.DARK_AQUA) + "Ultimate Buff applied!");
+                if (level == 2) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.DARK_AQUA) + "Ultimate Buff + Fire Resistance applied!");
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, duration, 0));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, duration, 1));
+                    p.sendMessage(String.valueOf(ChatColor.DARK_AQUA) + "Ultimate Buff + Fire Resistance + Haste II applied!");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.DARK_AQUA) + "Ultimate Buff applied!");
+                }
                 break;
             }
             case LUCK: {
@@ -241,6 +295,18 @@ public class AbilityListener
                 double baseYield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield_base", 1.5);
                 double perLevelYield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield_per_level", 0.5);
                 fb.setYield((float) (baseYield + (float) level * perLevelYield));
+                
+                if (level == 2) {
+                    p.getWorld().spawnParticle(Particle.FLAME, p.getLocation(), 30, 0.5, 0.5, 0.5, 0.1);
+                } else if (level >= 3) {
+                    p.getWorld().spawnParticle(Particle.FLAME, p.getLocation(), 50, 0.5, 0.5, 0.5, 0.1);
+                    p.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        if (p.isOnline()) {
+                            Fireball fb2 = (Fireball) p.launchProjectile(Fireball.class);
+                            fb2.setYield((float) (baseYield + (float) level * perLevelYield));
+                        }
+                    }, 5L);
+                }
                 break;
             }
             case WATER: {
@@ -252,39 +318,85 @@ public class AbilityListener
 
                 p.getWorld().getNearbyEntities(p.getLocation(), range, range, range).forEach(ent -> {
                     if (ent instanceof LivingEntity && ent != p) {
-                        ((LivingEntity) ent).damage(damage, (Entity) p);
-                        ent.setVelocity(new Vector(0, baseVelY + (level * perLevelVelY), 0));
+                        LivingEntity le = (LivingEntity) ent;
+                        le.damage(damage, (Entity) p);
+                        le.setVelocity(new Vector(0, baseVelY + (level * perLevelVelY), 0));
+                        if (level == 2) {
+                            le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 0));
+                        } else if (level >= 3) {
+                            le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 1));
+                        }
                     }
                 });
+                if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 0));
+                }
                 p.getWorld().spawnParticle(Particle.SPLASH, p.getLocation(), particleCount, 2.0, 2.0, 2.0);
                 p.playSound(p.getLocation(), Sound.ENTITY_GENERIC_SPLASH, 1.0f, 1.0f);
                 break;
             }
             case MINE: {
-                TNTPrimed tnt = (TNTPrimed) p.getWorld().spawn(p.getEyeLocation(), TNTPrimed.class);
                 double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 1.5);
                 int fuse = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "fuse_ticks", 25);
                 double yield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield", 4.0);
-                tnt.setVelocity(p.getLocation().getDirection().multiply(velMul));
-                tnt.setFuseTicks(fuse);
-                tnt.setYield((float) yield);
+                
+                if (level >= 3) {
+                    Vector dir = p.getLocation().getDirection();
+                    for (int i = -1; i <= 1; ++i) {
+                        TNTPrimed tnt = (TNTPrimed) p.getWorld().spawn(p.getEyeLocation(), TNTPrimed.class);
+                        Vector velocity = dir.clone().rotateAroundY(Math.toRadians(i * 15)).multiply(velMul);
+                        tnt.setVelocity(velocity);
+                        tnt.setFuseTicks(fuse);
+                        tnt.setYield((float) yield);
+                    }
+                } else {
+                    TNTPrimed tnt = (TNTPrimed) p.getWorld().spawn(p.getEyeLocation(), TNTPrimed.class);
+                    double actualVelMul = (level == 2) ? velMul * 1.3 : velMul;
+                    tnt.setVelocity(p.getLocation().getDirection().multiply(actualVelMul));
+                    tnt.setFuseTicks(fuse);
+                    tnt.setYield((float) yield);
+                }
                 break;
             }
             case DRAGON: {
-                DragonFireball dfb = (DragonFireball) p.launchProjectile(DragonFireball.class);
                 double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 1.5);
                 double yield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield", 2.0);
-                dfb.setVelocity(p.getLocation().getDirection().multiply(velMul));
-                dfb.setYield((float) yield);
+                
+                if (level >= 3) {
+                    Vector dir = p.getLocation().getDirection();
+                    for (int i = -1; i <= 1; ++i) {
+                        DragonFireball dfb = (DragonFireball) p.launchProjectile(DragonFireball.class);
+                        Vector velocity = dir.clone().rotateAroundY(Math.toRadians(i * 15)).multiply(velMul);
+                        dfb.setVelocity(velocity);
+                        dfb.setYield((float) yield);
+                    }
+                } else {
+                    DragonFireball dfb = (DragonFireball) p.launchProjectile(DragonFireball.class);
+                    dfb.setVelocity(p.getLocation().getDirection().multiply(velMul));
+                    dfb.setYield((float) yield);
+                    if (level == 2) {
+                        p.getWorld().spawnParticle(Particle.DRAGON_BREATH, p.getLocation().add(p.getLocation().getDirection().multiply(2)), 40, 1.0, 1.0, 1.0, 0.1);
+                    }
+                }
                 break;
             }
             case PVP: {
                 double range = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "range_per_level", 3.0) * level;
                 double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "damage_per_level", 7.0) * level;
+                double actualDamage = (level >= 3) ? damage * 1.5 : damage;
 
                 p.getWorld().getNearbyEntities(p.getLocation().add(p.getLocation().getDirection().multiply(3)), range, range, range).forEach(ent -> {
                     if (ent instanceof LivingEntity && ent != p) {
-                        ((LivingEntity) ent).damage(damage, (Entity) p);
+                        LivingEntity le = (LivingEntity) ent;
+                        le.damage(actualDamage, (Entity) p);
+                        if (level == 2) {
+                            le.setVelocity(le.getLocation().toVector().subtract(p.getLocation().toVector()).normalize().multiply(1.0).setY(0.3));
+                        } else if (level >= 3) {
+                            le.setVelocity(le.getLocation().toVector().subtract(p.getLocation().toVector()).normalize().multiply(1.5).setY(0.4));
+                            try {
+                                le.getWorld().spawnParticle(Particle.valueOf("CRIT"), le.getLocation(), 20, 0.3, 0.3, 0.3, 0.1);
+                            } catch (Exception ignored) {}
+                        }
                     }
                 });
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
@@ -302,7 +414,6 @@ public class AbilityListener
                     display.setInterpolationDuration(1);
                     display.setInterpolationDelay(0);
                     
-                    // Initial transformation (Z rotation starts at -60 deg, X at 45 deg)
                     org.joml.Vector3f scale = new org.joml.Vector3f(5.0f, 5.0f, 5.0f);
                     org.joml.Quaternionf leftRot = new org.joml.Quaternionf()
                             .rotationXYZ((float) Math.toRadians(45), 0.0f, (float) Math.toRadians(-60));
@@ -333,7 +444,6 @@ public class AbilityListener
                         
                         swordDisplay.setTransformation(new org.bukkit.util.Transformation(new org.joml.Vector3f(0, 0, 0), leftRot, scale, new org.joml.Quaternionf()));
                         
-                        // Spawn sweep particles
                         Location particleLoc = swordDisplay.getLocation().clone().add(p.getLocation().getDirection().multiply(1.0));
                         swordDisplay.getWorld().spawnParticle(Particle.SWEEP_ATTACK, particleLoc, 1);
                         
@@ -361,6 +471,12 @@ public class AbilityListener
                             LivingEntity le = (LivingEntity) ent;
                             if (damaged.add(le)) {
                                 le.damage(damage, (Entity) p);
+                                if (level == 2) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 80, 0));
+                                } else if (level >= 3) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 120, 0));
+                                    le.setVelocity(le.getLocation().toVector().subtract(p.getLocation().toVector()).normalize().multiply(1.5).setY(0.4));
+                                }
                             }
                         }
                     });
@@ -369,7 +485,8 @@ public class AbilityListener
                 break;
             }
             case HONOR: {
-                int arrowCount = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "arrows_per_level", 10) * level;
+                int baseArrowCount = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "arrows_per_level", 10) * level;
+                int arrowCount = (level >= 3) ? baseArrowCount * 2 : baseArrowCount;
                 double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 2.0);
                 double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "damage_per_level", 2.0) * level;
 
@@ -379,6 +496,10 @@ public class AbilityListener
                             .add(Vector.getRandom().subtract(new Vector(0.5, 0.5, 0.5)).multiply(0.5)));
                     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                     arrow.setDamage(damage);
+                    if (level >= 2) {
+                        arrow.setVisualFire(true);
+                        arrow.setFireTicks(100);
+                    }
                 }
                 p.playSound(p.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1.0f, 1.0f);
                 break;
@@ -481,21 +602,52 @@ public class AbilityListener
                         .forEach(ent -> {
                             if (ent != p && ent instanceof LivingEntity) {
                                 ent.setFireTicks(fireTicks);
+                                if (level >= 3) {
+                                    ent.setVelocity(ent.getLocation().toVector().subtract(loc.toVector()).normalize().multiply(1.2).setY(0.4));
+                                }
                             }
                         });
-                p.sendMessage(String.valueOf(ChatColor.GOLD) + "Ignited nearby enemies!");
+                if (level == 2) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 0));
+                    p.sendMessage(String.valueOf(ChatColor.GOLD) + "Ignited nearby enemies & gained Speed!");
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 1));
+                    try {
+                        p.getWorld().spawnParticle(Particle.valueOf("EXPLOSION"), p.getLocation(), 20, 1.0, 1.0, 1.0, 0.1);
+                    } catch (Exception ignored) {}
+                    p.sendMessage(String.valueOf(ChatColor.GOLD) + "Blast Ignited and knocked back nearby enemies!");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.GOLD) + "Ignited nearby enemies!");
+                }
                 break;
             }
             case WARDEN: {
                 int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "absorption_duration_per_level", 400) * level;
                 p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, duration, level - 1));
-                p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Gained Absorption hearts!");
+                if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 1));
+                    p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Gained Absorption III & Resistance II!");
+                } else if (level == 2) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Gained Absorption II & Resistance I!");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Gained Absorption hearts!");
+                }
                 break;
             }
             case WATER: {
                 int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "resistance_duration_per_level", 200) * level;
                 p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, level));
-                p.sendMessage(String.valueOf(ChatColor.AQUA) + "Water Shield activated! Gained Resistance.");
+                if (level == 2) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 0));
+                    p.sendMessage(String.valueOf(ChatColor.AQUA) + "Water Shield activated! Gained Resistance & Speed.");
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 0));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, duration, 1));
+                    p.sendMessage(String.valueOf(ChatColor.AQUA) + "Ultimate Water Shield! Gained Resistance, Speed & Dolphin's Grace.");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.AQUA) + "Water Shield activated! Gained Resistance.");
+                }
                 break;
             }
             case MINE: {
@@ -514,7 +666,16 @@ public class AbilityListener
                                 ((LivingEntity) ent).damage(damage, (Entity) p);
                             }
                         });
-                p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Safe Blast triggered!");
+                if (level == 2) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 200, 0));
+                    p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Safe Blast triggered! Gained Absorption shield.");
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 200, 1));
+                    p.setVelocity(new Vector(0, 1.2, 0));
+                    p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Safe Blast Rocket Jump! Gained Absorption shield.");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Safe Blast triggered!");
+                }
                 break;
             }
             case DRAGON: {
@@ -523,11 +684,23 @@ public class AbilityListener
 
                 p.getWorld().getNearbyEntities(p.getLocation(), range, range, range).forEach(ent -> {
                             if (ent instanceof LivingEntity && ent != p) {
-                                ((LivingEntity) ent).addPotionEffect(
-                                        new PotionEffect(PotionEffectType.LEVITATION, duration, level));
+                                LivingEntity le = (LivingEntity) ent;
+                                le.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, duration, level));
+                                if (level == 2) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, duration, 0));
+                                } else if (level >= 3) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, duration, 1));
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, duration, 0));
+                                }
                             }
                         });
-                p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Ground Trap activated! Enemies levitating.");
+                if (level == 2) {
+                    p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Ground Trap: Levitating and Withering enemies.");
+                } else if (level >= 3) {
+                    p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Ground Trap: Levitating, Withering, and Blinding enemies.");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Ground Trap activated! Enemies levitating.");
+                }
                 break;
             }
             case PVP: {
@@ -537,10 +710,25 @@ public class AbilityListener
                 for (int i = 0; i < minionCount; ++i) {
                     Wolf wolf = (Wolf) p.getWorld().spawn(p.getLocation(), Wolf.class);
                     wolf.setOwner((AnimalTamer) p);
-                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 1));
-                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, 1));
+                    if (level == 2) {
+                        wolf.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 1));
+                        wolf.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, 1));
+                        wolf.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 0));
+                    } else if (level >= 3) {
+                        wolf.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 2));
+                        wolf.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, 2));
+                        wolf.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 1));
+                    } else {
+                        wolf.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 0));
+                    }
                 }
-                p.sendMessage(String.valueOf(ChatColor.RED) + "Minions summoned!");
+                if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration / 2, 1));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration / 2, 1));
+                    p.sendMessage(String.valueOf(ChatColor.RED) + "Legendary Minions summoned! Gained temporary Strength & Speed!");
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.RED) + "Minions summoned!");
+                }
                 break;
             }
             case HONOR: {
@@ -554,6 +742,12 @@ public class AbilityListener
                                 le.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, blindness, 0));
                                 le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, wither, level - 1));
                                 le.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, blindness, 0));
+                                if (level == 2) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, blindness, 0));
+                                } else if (level >= 3) {
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, blindness, 1));
+                                    le.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, blindness, 0));
+                                }
                             }
                         });
                 try {
