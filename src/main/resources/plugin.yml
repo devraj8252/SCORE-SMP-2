@@ -1,0 +1,17 @@
+name: ScoresSMP
+version: '${project.version}'
+main: com.scoressmp.ScoresSMPPlugin
+api-version: '1.21'
+description: A new unique gameplay for Minecraft SMP with custom items and abilities!
+authors: [ScoresSMP]
+
+commands:
+  scoressmp:
+    description: Main command for ScoresSMP admin features.
+    aliases: [ssmp]
+    permission: scoressmp.admin
+
+permissions:
+  scoressmp.admin:
+    description: Allows management of the ScoresSMP plugin.
+    default: op
