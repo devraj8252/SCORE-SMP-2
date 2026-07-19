@@ -59,6 +59,7 @@ import org.bukkit.util.Vector;
 public class AbilityListener
         implements Listener {
     private final ScoresSMPPlugin plugin;
+    private final java.util.Map<java.util.UUID, Long> lastRightClick = new java.util.HashMap<>();
 
     public AbilityListener(ScoresSMPPlugin plugin) {
         this.plugin = plugin;
@@ -66,6 +67,9 @@ public class AbilityListener
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
+        if (event.getHand() == org.bukkit.inventory.EquipmentSlot.OFF_HAND) {
+            return;
+        }
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
         if (!ScoreItemManager.isScoreItem(item)) {
@@ -76,11 +80,31 @@ public class AbilityListener
             return;
         }
         int level = ScoreItemManager.getScoreLevel(item);
-        if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
-            this.handleLeftClick(player, type, level);
-        } else if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            event.setCancelled(true);
             this.handleRightClick(player, type, level);
+        } else if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            this.handleLeftClick(player, type, level);
         }
+    }
+
+    @EventHandler
+    public void onInteractEntity(org.bukkit.event.player.PlayerInteractEntityEvent event) {
+        if (event.getHand() == org.bukkit.inventory.EquipmentSlot.OFF_HAND) {
+            return;
+        }
+        Player player = event.getPlayer();
+        ItemStack item = player.getInventory().getItemInMainHand();
+        if (!ScoreItemManager.isScoreItem(item)) {
+            return;
+        }
+        ScoreType type = ScoreItemManager.getScoreType(item);
+        if (type == null) {
+            return;
+        }
+        event.setCancelled(true);
+        int level = ScoreItemManager.getScoreLevel(item);
+        this.handleRightClick(player, type, level);
     }
 
     @EventHandler
@@ -173,6 +197,12 @@ public class AbilityListener
 
     private void handleRightClick(Player p, ScoreType type, int level) {
         String ability = "RightClick_" + type.name();
+        long now = System.currentTimeMillis();
+        if (now - lastRightClick.getOrDefault(p.getUniqueId(), 0L) < 50) {
+            return;
+        }
+        lastRightClick.put(p.getUniqueId(), now);
+
         if (CooldownManager.isOnCooldown(p, ability)) {
             p.sendMessage(String.valueOf(ChatColor.RED) + "Ability on cooldown: "
                     + CooldownManager.getRemainingCooldown(p, ability) + "s");
