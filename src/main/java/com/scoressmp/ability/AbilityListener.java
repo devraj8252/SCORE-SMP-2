@@ -193,10 +193,28 @@ public class AbilityListener
                 break;
             }
             case LUCK: {
-                int speedAmp = com.scoressmp.config.ConfigManager.getAbilityInt(type, "left_click", "speed_amplifier", 1);
-                p.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, duration, 0));
+                int speedAmp = (level >= 2) ? 1 : 0;
+                p.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, duration, level - 1));
                 p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, speedAmp));
-                p.sendMessage(String.valueOf(ChatColor.GREEN) + "Lucky Boost applied!");
+                
+                if (level == 2) {
+                    if (new java.util.Random().nextDouble() < 0.10) {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 0));
+                        p.sendMessage(String.valueOf(ChatColor.GREEN) + "Lucky Boost applied! You got bonus Regeneration!");
+                    } else {
+                        p.sendMessage(String.valueOf(ChatColor.GREEN) + "Lucky Boost applied!");
+                    }
+                } else if (level >= 3) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 0));
+                    if (new java.util.Random().nextDouble() < 0.20) {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 200, 0));
+                        p.sendMessage(String.valueOf(ChatColor.GREEN) + "Lucky Boost applied! Gained Regeneration and bonus Resistance!");
+                    } else {
+                        p.sendMessage(String.valueOf(ChatColor.GREEN) + "Lucky Boost applied! Gained Regeneration!");
+                    }
+                } else {
+                    p.sendMessage(String.valueOf(ChatColor.GREEN) + "Lucky Boost applied!");
+                }
                 break;
             }
         }
@@ -366,7 +384,8 @@ public class AbilityListener
                 break;
             }
             case LUCK: {
-                int roll = new java.util.Random().nextInt(4) + 1;
+                int maxRoll = (level == 1) ? 4 : ((level == 2) ? 5 : 6);
+                int roll = new java.util.Random().nextInt(maxRoll) + 1;
                 int buffDuration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "buff_duration", 100);
                 
                 switch (roll) {
@@ -411,6 +430,27 @@ public class AbilityListener
                         } else {
                             p.sendMessage(String.valueOf(ChatColor.GREEN) + "☘ Fate Roll: You rolled a 4, but no enemies were nearby!");
                         }
+                        break;
+                    }
+                    case 5: {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, 200, 0));
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1));
+                        p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "☘ Fate Roll: You rolled a 5! A Miracle occurred! Gained Hero of the Village and Regeneration II.");
+                        p.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, p.getLocation(), 50, 1.0, 1.0, 1.0, 0.1);
+                        p.playSound(p.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, 1.0f, 1.0f);
+                        break;
+                    }
+                    case 6: {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 300, 1));
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 300, 1));
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 300, 0));
+                        p.sendMessage(String.valueOf(ChatColor.GOLD) + "☘ Fate Roll: You rolled a 6! You rolled Death Defy! Shielded with totem-like energies.");
+                        try {
+                            p.getWorld().spawnParticle(Particle.valueOf("TOTEM_OF_UNDYING"), p.getLocation(), 30, 0.5, 0.5, 0.5, 0.1);
+                        } catch (Exception ignored) {
+                            p.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, p.getLocation(), 30, 0.5, 0.5, 0.5, 0.1);
+                        }
+                        p.playSound(p.getLocation(), Sound.ITEM_TOTEM_USE, 1.0f, 1.0f);
                         break;
                     }
                 }
@@ -530,7 +570,11 @@ public class AbilityListener
                 int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "duration_per_level", 200) * level;
                 java.util.UUID uuid = p.getUniqueId();
                 activeJackpots.add(uuid);
-                p.sendMessage(String.valueOf(ChatColor.GOLD) + "✦ JACKPOT ACTIVATED! Mob drops and XP are doubled! ✦");
+                
+                String message = (level >= 3) 
+                        ? "✦ JACKPOT ACTIVATED! Mob drops and XP are TRIPLED! ✦" 
+                        : "✦ JACKPOT ACTIVATED! Mob drops and XP are DOUBLED! ✦";
+                p.sendMessage(String.valueOf(ChatColor.GOLD) + message);
                 p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
                 
                 new org.bukkit.scheduler.BukkitRunnable() {
@@ -566,9 +610,25 @@ public class AbilityListener
             return;
         }
         if (activeJackpots.contains(killer.getUniqueId())) {
+            ItemStack item = killer.getInventory().getItemInMainHand();
+            int level = 1;
+            if (ScoreItemManager.isScoreItem(item) && ScoreItemManager.getScoreType(item) == ScoreType.LUCK) {
+                level = ScoreItemManager.getScoreLevel(item);
+            }
+            
             killer.playSound(killer.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-            event.getDrops().forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * 2));
-            event.setDroppedExp(event.getDroppedExp() * 2);
+            int multiplier = (level >= 3) ? 3 : 2;
+            event.getDrops().forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * multiplier));
+            event.setDroppedExp(event.getDroppedExp() * multiplier);
+            
+            double gemstoneChance = (level == 2) ? 0.10 : ((level >= 3) ? 0.25 : 0.0);
+            if (gemstoneChance > 0 && new java.util.Random().nextDouble() < gemstoneChance) {
+                org.bukkit.Material[] gems = {org.bukkit.Material.EMERALD, org.bukkit.Material.DIAMOND, org.bukkit.Material.IRON_INGOT};
+                org.bukkit.Material gem = gems[new java.util.Random().nextInt(gems.length)];
+                event.getDrops().add(new ItemStack(gem, 1));
+                killer.sendMessage(String.valueOf(ChatColor.GOLD) + "☘ Lucky drop! The mob dropped an extra " + gem.name() + "!");
+            }
+            
             dead.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, dead.getLocation(), 15, 0.5, 0.5, 0.5, 0.1);
         }
     }
