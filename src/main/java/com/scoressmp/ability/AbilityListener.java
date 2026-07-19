@@ -261,6 +261,58 @@ public class AbilityListener
                     }
                 });
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
+
+                // Spawn the visual giant sword (ItemDisplay)
+                Location eye = p.getEyeLocation();
+                Vector dir = eye.getDirection();
+                Location spawnLoc = eye.clone().add(dir.clone().multiply(1.5));
+                spawnLoc.setYaw(p.getLocation().getYaw());
+                spawnLoc.setPitch(p.getLocation().getPitch());
+
+                org.bukkit.entity.ItemDisplay swordDisplay = p.getWorld().spawn(spawnLoc, org.bukkit.entity.ItemDisplay.class, display -> {
+                    display.setItemStack(new org.bukkit.inventory.ItemStack(org.bukkit.Material.NETHERITE_SWORD));
+                    display.setBillboard(org.bukkit.entity.Display.Billboard.NONE);
+                    display.setInterpolationDuration(1);
+                    display.setInterpolationDelay(0);
+                    
+                    // Initial transformation (Z rotation starts at -60 deg, X at 45 deg)
+                    org.joml.Vector3f scale = new org.joml.Vector3f(5.0f, 5.0f, 5.0f);
+                    org.joml.Quaternionf leftRot = new org.joml.Quaternionf()
+                            .rotationXYZ((float) Math.toRadians(45), 0.0f, (float) Math.toRadians(-60));
+                    display.setTransformation(new org.bukkit.util.Transformation(new org.joml.Vector3f(0, 0, 0), leftRot, scale, new org.joml.Quaternionf()));
+                });
+
+                new org.bukkit.scheduler.BukkitRunnable() {
+                    int tick = 0;
+                    @Override
+                    public void run() {
+                        if (!swordDisplay.isValid()) {
+                            this.cancel();
+                            return;
+                        }
+                        if (tick >= 5) {
+                            swordDisplay.remove();
+                            this.cancel();
+                            return;
+                        }
+                        
+                        float progress = (float) (tick + 1) / 5.0f; // 0.2 to 1.0
+                        float zAngle = -60.0f + (progress * 120.0f); // swing from -60 to +60
+                        float xAngle = 45.0f - (progress * 90.0f);   // swing from 45 to -45
+                        
+                        org.joml.Vector3f scale = new org.joml.Vector3f(5.0f, 5.0f, 5.0f);
+                        org.joml.Quaternionf leftRot = new org.joml.Quaternionf()
+                                .rotationXYZ((float) Math.toRadians(xAngle), 0.0f, (float) Math.toRadians(zAngle));
+                        
+                        swordDisplay.setTransformation(new org.bukkit.util.Transformation(new org.joml.Vector3f(0, 0, 0), leftRot, scale, new org.joml.Quaternionf()));
+                        
+                        // Spawn sweep particles
+                        Location particleLoc = swordDisplay.getLocation().clone().add(p.getLocation().getDirection().multiply(1.0));
+                        swordDisplay.getWorld().spawnParticle(Particle.SWEEP_ATTACK, particleLoc, 1);
+                        
+                        tick++;
+                    }
+                }.runTaskTimer(plugin, 0L, 1L);
                 break;
             }
             case WARDEN: {
