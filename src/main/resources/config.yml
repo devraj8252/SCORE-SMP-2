@@ -113,6 +113,7 @@ items:
         name: "TNT Cannon"
         velocity_multiplier: 1.5
         fuse_ticks: 25
+        yield: 4.0
       shift_click:
         name: "Safe Blast"
         damage_per_level: 10.0
@@ -148,6 +149,7 @@ items:
       right_click:
         name: "Dragon's Breath"
         velocity_multiplier: 1.5
+        yield: 2.0
       shift_click:
         name: "Ground Trap"
         range_per_level: 5.0
@@ -248,6 +250,7 @@ items:
         name: "Arrow Swarm"
         arrows_per_level: 10
         velocity_multiplier: 2.0
+        damage_per_level: 2.0
       shift_click:
         name: "Shamak"
         range_per_level: 10.0

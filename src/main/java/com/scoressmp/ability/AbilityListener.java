@@ -207,14 +207,18 @@ public class AbilityListener
                 TNTPrimed tnt = (TNTPrimed) p.getWorld().spawn(p.getEyeLocation(), TNTPrimed.class);
                 double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 1.5);
                 int fuse = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "fuse_ticks", 25);
+                double yield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield", 4.0);
                 tnt.setVelocity(p.getLocation().getDirection().multiply(velMul));
                 tnt.setFuseTicks(fuse);
+                tnt.setYield((float) yield);
                 break;
             }
             case DRAGON: {
                 DragonFireball dfb = (DragonFireball) p.launchProjectile(DragonFireball.class);
                 double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 1.5);
+                double yield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield", 2.0);
                 dfb.setVelocity(p.getLocation().getDirection().multiply(velMul));
+                dfb.setYield((float) yield);
                 break;
             }
             case PVP: {
@@ -234,6 +238,7 @@ public class AbilityListener
                 Vector dir = eye.getDirection();
                 int range = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "range_per_level", 15) * level;
                 double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "damage_per_level", 8.0) * level;
+                java.util.Set<LivingEntity> damaged = new java.util.HashSet<>();
 
                 for (int i = 0; i < range; ++i) {
                     Location point = eye.clone().add(dir.clone().multiply(i));
@@ -244,7 +249,10 @@ public class AbilityListener
                     }
                     p.getWorld().getNearbyEntities(point, 1.5, 1.5, 1.5).forEach(ent -> {
                         if (ent instanceof LivingEntity && ent != p) {
-                            ((LivingEntity) ent).damage(damage, (Entity) p);
+                            LivingEntity le = (LivingEntity) ent;
+                            if (damaged.add(le)) {
+                                le.damage(damage, (Entity) p);
+                            }
                         }
                     });
                 }
@@ -254,12 +262,14 @@ public class AbilityListener
             case HONOR: {
                 int arrowCount = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "arrows_per_level", 10) * level;
                 double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 2.0);
+                double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "damage_per_level", 2.0) * level;
 
                 for (int i = 0; i < arrowCount; ++i) {
                     Arrow arrow = (Arrow) p.launchProjectile(Arrow.class);
                     arrow.setVelocity(p.getLocation().getDirection().multiply(velMul)
                             .add(Vector.getRandom().subtract(new Vector(0.5, 0.5, 0.5)).multiply(0.5)));
                     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+                    arrow.setDamage(damage);
                 }
                 p.playSound(p.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1.0f, 1.0f);
                 break;
