@@ -60,38 +60,47 @@ public class ScoreItemManager {
                 .text((String) (type.getDisplayName() + " [Lv " + level + "]"))
                 .color((TextColor) NamedTextColor.LIGHT_PURPLE)).decorate(TextDecoration.BOLD))
                 .decoration(TextDecoration.ITALIC, false));
+        meta.getPersistentDataContainer().set(SCORE_TYPE_KEY, PersistentDataType.STRING, type.name());
+        meta.getPersistentDataContainer().set(SCORE_LEVEL_KEY, PersistentDataType.INTEGER, level);
+        meta.setCustomModelData(getBaseModelData(type) + level);
+        item.setItemMeta(meta);
+        
+        updateProgressLore(item, type, level, 0);
+        return item;
+    }
+
+    public static void updateProgressLore(ItemStack item, ScoreType type, int level, int progress) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return;
+        }
+        meta.getPersistentDataContainer().set(SCORE_PROGRESS_KEY, PersistentDataType.INTEGER, progress);
+        
         ArrayList<Component> lore = new ArrayList<Component>();
-        lore.add(((TextComponent) Component.text((String) ("Level: " + level + "/3"))
-                .color((TextColor) NamedTextColor.AQUA)).decoration(TextDecoration.ITALIC, false));
+        lore.add(((TextComponent) Component.text("Level: " + level + "/3")
+                .color(NamedTextColor.AQUA)).decoration(TextDecoration.ITALIC, false));
         if (level < 3) {
             lore.add(((TextComponent) Component
-                    .text((String) ("Progress: 0/" + ScoreItemManager.getRequiredProgress(type, level)))
-                    .color((TextColor) NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, false));
-            lore.add(((TextComponent) Component.text((String) ScoreItemManager.getChallengeDescription(type, level))
-                    .color((TextColor) NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false));
+                    .text("Progress: " + progress + "/" + ScoreItemManager.getRequiredProgress(type, level))
+                    .color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, false));
+            lore.add(((TextComponent) Component.text(ScoreItemManager.getChallengeDescription(type, level))
+                    .color(NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false));
         } else {
-            lore.add(((TextComponent) ((TextComponent) Component.text((String) "MAX LEVEL")
-                    .color((TextColor) NamedTextColor.GOLD)).decorate(TextDecoration.BOLD))
+            lore.add(((TextComponent) ((TextComponent) Component.text("MAX LEVEL")
+                    .color(NamedTextColor.GOLD)).decorate(TextDecoration.BOLD))
                     .decoration(TextDecoration.ITALIC, false));
         }
         lore.add(Component.empty());
-        lore.add(((TextComponent) Component.text((String) "Abilities:").color((TextColor) NamedTextColor.GREEN))
+        lore.add(((TextComponent) Component.text("Abilities:").color(NamedTextColor.GREEN))
                 .decoration(TextDecoration.ITALIC, false));
-        lore.add(((TextComponent) Component.text((String) ("Left-Click: " + ScoreItemManager.getLeftClickAbility(type)))
-                .color((TextColor) NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false));
-        lore.add(((TextComponent) Component
-                .text((String) ("Right-Click: " + ScoreItemManager.getRightClickAbility(type)))
-                .color((TextColor) NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false));
-        lore.add(((TextComponent) Component
-                .text((String) ("Shift-Click: " + ScoreItemManager.getShiftClickAbility(type)))
-                .color((TextColor) NamedTextColor.GRAY)).decoration(TextDecoration.ITALIC, false));
+        lore.add(((TextComponent) Component.text("Left-Click: " + ScoreItemManager.getLeftClickAbility(type)))
+                .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(((TextComponent) Component.text("Right-Click: " + ScoreItemManager.getRightClickAbility(type)))
+                .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(((TextComponent) Component.text("Shift-Click: " + ScoreItemManager.getShiftClickAbility(type)))
+                .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         meta.lore(lore);
-        meta.getPersistentDataContainer().set(SCORE_TYPE_KEY, PersistentDataType.STRING, type.name());
-        meta.getPersistentDataContainer().set(SCORE_LEVEL_KEY, PersistentDataType.INTEGER, level);
-        meta.getPersistentDataContainer().set(SCORE_PROGRESS_KEY, PersistentDataType.INTEGER, 0);
-        meta.setCustomModelData(getBaseModelData(type) + level);
         item.setItemMeta(meta);
-        return item;
     }
 
     private static Material getBaseMaterial(ScoreType type) {

@@ -98,23 +98,23 @@ public class ProgressionManager
             return;
         }
         ScoreType type = ScoreItemManager.getScoreType(item);
-        if (type != ScoreType.MINE) {
+        if (type == null) {
             return;
-                
         }
         int level = ScoreItemManager.getScoreLevel(item);
         if (level >= 3) {
             return;
         }
         java.util.List<String> allowedBlocks = com.scoressmp.config.ConfigManager.getChallengeBlocks(type);
+        if (allowedBlocks == null || allowedBlocks.isEmpty()) {
+            return;
+        }
         boolean validBreak = false;
-        if (allowedBlocks != null) {
-            String blockTypeName = event.getBlock().getType().name();
-            for (String block : allowedBlocks) {
-                if (blockTypeName.equalsIgnoreCase(block) || blockTypeName.contains(block.toUpperCase())) {
-                    validBreak = true;
-                    break;
-                }
+        String blockTypeName = event.getBlock().getType().name();
+        for (String block : allowedBlocks) {
+            if (blockTypeName.equalsIgnoreCase(block) || blockTypeName.contains(block.toUpperCase())) {
+                validBreak = true;
+                break;
             }
         }
         if (validBreak) {
@@ -122,7 +122,6 @@ public class ProgressionManager
         }
     }
  
-                 
     private void addProgress(Player player, ItemStack item, ScoreType type, int level, int amount) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
@@ -135,13 +134,13 @@ public class ProgressionManager
         currentProgress += amount;
         if (currentProgress >= required) {
             int newLevel = level + 1;
- 
             ItemStack upgradedItem = ScoreItemManager.createScoreWeapon(type, newLevel);
             player.getInventory().setItemInMainHand(upgradedItem);
+            player.sendMessage(org.bukkit.ChatColor.GREEN + "✔ Your " + type.getDisplayName() + " has leveled up to Level " + newLevel + "!");
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
         } else {
-            meta.getPersistentDataContainer().set(ScoreItemManager.SCORE_PROGRESS_KEY, PersistentDataType.INTEGER,
-                    currentProgress);
-            item.setItemMeta(meta);
+            ScoreItemManager.updateProgressLore(item, type, level, currentProgress);
+            player.getInventory().setItemInMainHand(item);
         }
     }
 }
