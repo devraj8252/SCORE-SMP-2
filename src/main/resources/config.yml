@@ -1,0 +1,255 @@
+# ==============================================================================
+#                             ScoresSMP Configuration
+# ==============================================================================
+
+# Global settings
+settings:
+  # Enable debug messages in the console
+  debug: false
+
+# Individual Score type configurations
+items:
+  FIRE:
+    display_name: "Fire Score"
+    base_material: "ORANGE_DYE"
+    base_model_data: 1000000
+    recipe:
+      item1: "BLAZE_ROD"
+      item2: "MAGMA_CREAM"
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Fire Resistance"
+        duration_per_level: 200 # In ticks (20 ticks = 1 second)
+      right_click:
+        name: "Fireball"
+        yield_base: 1.5
+        yield_per_level: 0.5
+      shift_click:
+        name: "Ignite Ring"
+        range_per_level: 5.0
+        fire_ticks_per_level: 100
+    progression:
+      required_progress_lv1: 50
+      required_progress_lv2: 150
+      challenge_description: "Kill Nether Mobs."
+      entities:
+        - "BLAZE"
+        - "GHAST"
+        - "MAGMA_CUBE"
+        - "PIGLIN"
+    loot:
+      structures:
+        bastion: 0.20
+        ruined_portal: 0.20
+        nether_bridge: 0.20
+      entities:
+        BLAZE: 0.05
+        GHAST: 0.05
+        MAGMA_CUBE: 0.05
+        PIGLIN: 0.05
+
+  WATER:
+    display_name: "Water Score"
+    base_material: "BLUE_DYE"
+    base_model_data: 6000000
+    recipe:
+      item1: "HEART_OF_THE_SEA"
+      item2: "PRISMARINE_CRYSTALS"
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Aqua Dash"
+        duration_per_level: 200 # In ticks
+        velocity_multiplier_base: 2.0
+        velocity_multiplier_per_level: 0.5
+      right_click:
+        name: "Geyser"
+        range_per_level: 4.0
+        damage_per_level: 6.0
+        velocity_y_base: 1.5
+        velocity_y_per_level: 0.2
+      shift_click:
+        name: "Water Shield"
+        resistance_duration_per_level: 200
+    progression:
+      required_progress_lv1: 50
+      required_progress_lv2: 150
+      challenge_description: "Kill Ocean Mobs."
+      entities:
+        - "GUARDIAN"
+        - "DROWNED"
+    loot:
+      structures:
+        buried_treasure: 1.0
+        shipwreck: 0.25
+      entities:
+        GUARDIAN: 0.25
+        ELDER_GUARDIAN: 0.10
+        DROWNED: 0.05
+
+  MINE:
+    display_name: "Mine Score"
+    base_material: "BLACK_DYE"
+    base_model_data: 3000000
+    recipe:
+      item1: "DIAMOND_BLOCK"
+      item2: "NETHERITE_INGOT"
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Haste"
+        duration_per_level: 200 # In ticks
+      right_click:
+        name: "TNT Cannon"
+        velocity_multiplier: 1.5
+        fuse_ticks: 25
+      shift_click:
+        name: "Safe Blast"
+        damage_per_level: 10.0
+        range_per_level: 4.0
+    progression:
+      required_progress_lv1: 50
+      required_progress_lv2: 150
+      challenge_description: "Mine Diamond Ore."
+      blocks:
+        - "DIAMOND_ORE"
+        - "DEEPSLATE_DIAMOND_ORE"
+        - "ANCIENT_DEBRIS"
+    loot:
+      structures:
+        abandoned_mineshaft: 0.20
+        simple_dungeon: 0.20
+
+  DRAGON:
+    display_name: "Dragon Score"
+    base_material: "MAGMA_DYE"
+    base_model_data: 2000000
+    recipe:
+      item1: "DRAGON_BREATH"
+      item2: "END_CRYSTAL"
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Flight"
+        duration_per_level: 200 # In ticks
+      right_click:
+        name: "Dragon's Breath"
+        velocity_multiplier: 1.5
+      shift_click:
+        name: "Ground Trap"
+        range_per_level: 5.0
+        levitation_duration_per_level: 100
+    progression:
+      required_progress_lv1: 50
+      required_progress_lv2: 150
+      challenge_description: "Kill Endermen/End Mobs."
+      entities:
+        - "ENDERMAN"
+        - "ENDER_DRAGON"
+    loot:
+      structures:
+        end_city_treasure: 0.20
+      entities:
+        ENDER_DRAGON: 0.50
+
+  PVP:
+    display_name: "PvP Score"
+    base_material: "YELLOW_DYE"
+    base_model_data: 4000000
+    recipe:
+      item1: "GOLDEN_APPLE"
+      item2: "NETHERITE_SWORD"
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Strength"
+        duration_per_level: 200 # In ticks
+      right_click:
+        name: "Giant Sword"
+        damage_per_level: 7.0
+        range_per_level: 3.0
+      shift_click:
+        name: "Summon Minions"
+        minions_per_level: 2
+        wolf_duration_per_level: 400
+    progression:
+      required_progress_lv1: 50
+      required_progress_lv2: 150
+      challenge_description: "Kill other Players."
+      entities:
+        - "PLAYER"
+    loot:
+      entities:
+        PLAYER: 0.05
+
+  WARDEN:
+    display_name: "Warden Score"
+    base_material: "CYAN_DYE"
+    base_model_data: 5000000
+    recipe:
+      item1: "ECHO_SHARD"
+      item2: "SCULK_CATALYST"
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Regeneration"
+        duration_per_level: 200 # In ticks
+      right_click:
+        name: "Sonic Boom"
+        range_per_level: 15.0
+        damage_per_level: 8.0
+      shift_click:
+        name: "Absorption Hearts"
+        absorption_duration_per_level: 400
+    progression:
+      required_progress_lv1: 50
+      required_progress_lv2: 150
+      challenge_description: "Kill Wardens or Shriekers."
+      entities:
+        - "WARDEN"
+    loot:
+      structures:
+        ancient_city: 0.20
+      entities:
+        WARDEN: 0.50
+
+  HONOR:
+    display_name: "Honor Score"
+    base_material: "GREEN_DYE"
+    base_model_data: 7000000
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Ultimate Buff"
+        duration_per_level: 200 # In ticks
+      right_click:
+        name: "Arrow Swarm"
+        arrows_per_level: 10
+        velocity_multiplier: 2.0
+      shift_click:
+        name: "Shamak"
+        range_per_level: 10.0
+        blindness_duration_per_level: 200
+        wither_duration_per_level: 200

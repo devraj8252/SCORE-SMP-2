@@ -75,43 +75,14 @@ public class ProgressionManager
         }
         LivingEntity dead = event.getEntity();
         boolean validKill = false;
-        switch (type) {
-            case FIRE: {
-                if (!(dead instanceof Blaze) && !(dead instanceof Ghast) && !(dead instanceof MagmaCube)
-                        
-                    
-                        && !(dead instanceof Piglin))
+        java.util.List<String> allowedEntities = com.scoressmp.config.ConfigManager.getChallengeEntities(type);
+        if (allowedEntities != null && !allowedEntities.isEmpty()) {
+            String entityTypeName = dead.getType().name();
+            for (String ent : allowedEntities) {
+                if (entityTypeName.equalsIgnoreCase(ent)) {
+                    validKill = true;
                     break;
-                validKill = true;
-                break;
-            }
-                    
-            case WATER: {
-                if (!(dead instanceof Guardian) && !(dead instanceof Drowned))
-                    break;
-                validKill = true;
-                break;
-                    
-            }
-            case DRAGON: {
-                if (!(dead instanceof Enderman) && !(dead instanceof EnderDragon))
-                    break;
-                validKill = true;
-                    
-                break;
-            }
-            case PVP: {
-                if (!(dead instanceof Player))
-                    break;
-                    
-                validKill = true;
-                break;
-            }
-            case WARDEN: {
-                if (!(dead instanceof Warden))
-                    break;
-                validKill = true;
-                break;
+                }
             }
         }
         if (validKill) {
@@ -135,22 +106,31 @@ public class ProgressionManager
         if (level >= 3) {
             return;
         }
-        if (event.getBlock().getType().name().contains("DIAMOND_ORE")
-                || event.getBlock().getType().name().contains("ANCIENT_DEBRIS")) {
+        java.util.List<String> allowedBlocks = com.scoressmp.config.ConfigManager.getChallengeBlocks(type);
+        boolean validBreak = false;
+        if (allowedBlocks != null) {
+            String blockTypeName = event.getBlock().getType().name();
+            for (String block : allowedBlocks) {
+                if (blockTypeName.equalsIgnoreCase(block) || blockTypeName.contains(block.toUpperCase())) {
+                    validBreak = true;
+                    break;
+                }
+            }
+        }
+        if (validBreak) {
             this.addProgress(player, item, type, level, 1);
         }
     }
  
                  
     private void addProgress(Player player, ItemStack item, ScoreType type, int level, int amount) {
-        int required;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
             return;
         }
         int currentProgress = meta.getPersistentDataContainer().getOrDefault(ScoreItemManager.SCORE_PROGRESS_KEY,
                 PersistentDataType.INTEGER, 0);
-        required = level == 1 ? 50 : 150;
+        int required = com.scoressmp.config.ConfigManager.getRequiredProgress(type, level);
                      
         currentProgress += amount;
         if (currentProgress >= required) {

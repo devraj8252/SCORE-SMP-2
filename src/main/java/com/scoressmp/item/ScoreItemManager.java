@@ -95,27 +95,11 @@ public class ScoreItemManager {
     }
 
     private static Material getBaseMaterial(ScoreType type) {
-        return switch (type) {
-            case FIRE -> Material.ORANGE_DYE;
-            case DRAGON -> Material.MAGENTA_DYE;
-            case MINE -> Material.BLACK_DYE;
-            case PVP -> Material.YELLOW_DYE;
-            case WARDEN -> Material.CYAN_DYE;
-            case WATER -> Material.BLUE_DYE;
-            case HONOR -> Material.GREEN_DYE;
-        };
+        return com.scoressmp.config.ConfigManager.getBaseMaterial(type);
     }
 
     private static int getBaseModelData(ScoreType type) {
-        return switch (type) {
-            case FIRE -> 1000000;
-            case DRAGON -> 2000000;
-            case MINE -> 3000000;
-            case PVP -> 4000000;
-            case WARDEN -> 5000000;
-            case WATER -> 6000000;
-            case HONOR -> 7000000;
-        };
+        return com.scoressmp.config.ConfigManager.getBaseModelData(type);
     }
 
     public static boolean isScoreItem(ItemStack item) {
@@ -159,54 +143,22 @@ public class ScoreItemManager {
     }
 
     private static int getRequiredProgress(ScoreType type, int level) {
-        return level == 1 ? 50 : 150;
+        return com.scoressmp.config.ConfigManager.getRequiredProgress(type, level);
     }
 
     private static String getChallengeDescription(ScoreType type, int level) {
-        return switch (type) {
-            case FIRE -> "Kill Nether Mobs.";
-            case WATER -> "Kill Ocean Mobs.";
-            case MINE -> "Mine Diamond Ore.";
-            case DRAGON -> "Kill Endermen/End Mobs.";
-            case PVP -> "Kill other Players.";
-            case WARDEN -> "Kill Wardens or Shriekers.";
-            case HONOR -> "";
-        };
+        return com.scoressmp.config.ConfigManager.getChallengeDescription(type);
     }
 
     private static String getLeftClickAbility(ScoreType type) {
-        return switch (type) {
-            case FIRE -> "Fire Resistance";
-            case WATER -> "Aqua Dash";
-            case MINE -> "Haste";
-            case DRAGON -> "Flight";
-            case PVP -> "Strength";
-            case WARDEN -> "Regeneration";
-            case HONOR -> "Ultimate Buff";
-        };
+        return com.scoressmp.config.ConfigManager.getAbilityName(type, "left_click");
     }
 
     private static String getRightClickAbility(ScoreType type) {
-        return switch (type) {
-            case FIRE -> "Fireball";
-            case WATER -> "Geyser";
-            case MINE -> "TNT Cannon";
-            case DRAGON -> "Dragon's Breath";
-            case PVP -> "Giant Sword";
-            case WARDEN -> "Sonic Boom";
-            case HONOR -> "Arrow Swarm";
-        };
+        return com.scoressmp.config.ConfigManager.getAbilityName(type, "right_click");
     }
 
     private static String getShiftClickAbility(ScoreType type) {
-        return switch (type) {
-            case FIRE -> "Ignite Ring";
-            case WATER -> "Water Shield";
-            case MINE -> "Safe Blast";
-            case DRAGON -> "Ground Trap";
-            case PVP -> "Summon Minions";
-            case WARDEN -> "Absorption Hearts";
-            case HONOR -> "Shamak";
-        };
+        return com.scoressmp.config.ConfigManager.getAbilityName(type, "shift_click");
     }
 }

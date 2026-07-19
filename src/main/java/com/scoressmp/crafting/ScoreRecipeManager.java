@@ -29,12 +29,14 @@ import org.bukkit.plugin.Plugin;
 
 public class ScoreRecipeManager {
     public static void registerRecipes(ScoresSMPPlugin plugin) {
-        ScoreRecipeManager.registerRecipe(plugin, ScoreType.FIRE, Material.BLAZE_ROD, Material.MAGMA_CREAM);
-        ScoreRecipeManager.registerRecipe(plugin, ScoreType.WATER, Material.HEART_OF_THE_SEA, Material.PRISMARINE_CRYSTALS);
-        ScoreRecipeManager.registerRecipe(plugin, ScoreType.MINE, Material.DIAMOND_BLOCK, Material.NETHERITE_INGOT);
-        ScoreRecipeManager.registerRecipe(plugin, ScoreType.DRAGON, Material.DRAGON_BREATH, Material.END_CRYSTAL);
-        ScoreRecipeManager.registerRecipe(plugin, ScoreType.PVP, Material.GOLDEN_APPLE, Material.NETHERITE_SWORD);
-        ScoreRecipeManager.registerRecipe(plugin, ScoreType.WARDEN, Material.ECHO_SHARD, Material.SCULK_CATALYST);
+        for (ScoreType type : ScoreType.values()) {
+            if (type == ScoreType.HONOR) continue;
+            Material item1 = com.scoressmp.config.ConfigManager.getRecipeItem(type, "item1");
+            Material item2 = com.scoressmp.config.ConfigManager.getRecipeItem(type, "item2");
+            if (item1 != null && item1 != Material.AIR && item2 != null && item2 != Material.AIR) {
+                ScoreRecipeManager.registerRecipe(plugin, type, item1, item2);
+            }
+        }
         ScoreRecipeManager.registerHonorRecipe(plugin);
     }
 

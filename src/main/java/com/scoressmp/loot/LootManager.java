@@ -53,58 +53,47 @@ implements Listener {
     public void onLootGenerate(LootGenerateEvent event) {
         NamespacedKey lootTableKey = event.getLootTable().getKey();
         String keyPath = lootTableKey.getKey();
-        if (keyPath.contains("bastion") || keyPath.contains("ruined_portal") || keyPath.contains("nether_bridge")) {
-            if (this.random.nextDouble() <= 0.2) {
-                this.addTemplate(event, ScoreType.FIRE);
+        
+        for (ScoreType type : ScoreType.values()) {
+            if (type == ScoreType.HONOR) continue;
+            String matchedStructure = getMatchedStructure(keyPath, type);
+            if (matchedStructure != null) {
+                double chance = com.scoressmp.config.ConfigManager.getLootStructureChance(type, matchedStructure);
+                if (chance > 0 && this.random.nextDouble() <= chance) {
+                    this.addTemplate(event, type);
+                }
             }
-        } else if (keyPath.equals(LootTables.BURIED_TREASURE.getKey().getKey())) {
-            this.addTemplate(event, ScoreType.WATER);
-        } else if (keyPath.contains("shipwreck")) {
-            if (this.random.nextDouble() <= 0.25) {
-                this.addTemplate(event, ScoreType.WATER);
-            }
-        } else if (keyPath.equals(LootTables.ABANDONED_MINESHAFT.getKey().getKey()) || keyPath.equals(LootTables.SIMPLE_DUNGEON.getKey().getKey())) {
-            if (this.random.nextDouble() <= 0.2) {
-                this.addTemplate(event, ScoreType.MINE);
-            }
-        } else if (keyPath.equals(LootTables.END_CITY_TREASURE.getKey().getKey())) {
-            if (this.random.nextDouble() <= 0.2) {
-                this.addTemplate(event, ScoreType.DRAGON);
-            }
-        } else if (keyPath.equals(LootTables.ANCIENT_CITY.getKey().getKey()) && this.random.nextDouble() <= 0.2) {
-            this.addTemplate(event, ScoreType.WARDEN);
         }
+    }
+
+    private String getMatchedStructure(String keyPath, ScoreType type) {
+        String[] keys = switch(type) {
+            case FIRE -> new String[]{"bastion", "ruined_portal", "nether_bridge"};
+            case WATER -> new String[]{"buried_treasure", "shipwreck"};
+            case MINE -> new String[]{"abandoned_mineshaft", "simple_dungeon"};
+            case DRAGON -> new String[]{"end_city_treasure"};
+            case WARDEN -> new String[]{"ancient_city"};
+            default -> new String[0];
+        };
+        for (String k : keys) {
+            if (keyPath.contains(k)) {
+                return k;
+            }
+        }
+        return null;
     }
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity dead = event.getEntity();
-        if (dead instanceof Blaze || dead instanceof Ghast || dead instanceof MagmaCube || dead instanceof Piglin) {
-            if (this.random.nextDouble() <= 0.05) {
-                this.dropTemplate(event, ScoreType.FIRE);
+        String typeName = dead.getType().name();
+        
+        for (ScoreType type : ScoreType.values()) {
+            if (type == ScoreType.HONOR) continue;
+            double chance = com.scoressmp.config.ConfigManager.getLootEntityChance(type, typeName);
+            if (chance > 0 && this.random.nextDouble() <= chance) {
+                this.dropTemplate(event, type);
             }
-        } else if (dead instanceof Guardian) {
-            if (this.random.nextDouble() <= 0.25) {
-                this.dropTemplate(event, ScoreType.WATER);
-            }
-        } else if (dead instanceof ElderGuardian) {
-            if (this.random.nextDouble() <= 0.1) {
-                this.dropTemplate(event, ScoreType.WATER);
-            }
-        } else if (dead instanceof Drowned) {
-            if (this.random.nextDouble() <= 0.05) {
-                this.dropTemplate(event, ScoreType.WATER);
-            }
-        } else if (dead instanceof EnderDragon) {
-            if (this.random.nextDouble() <= 0.5) {
-                this.dropTemplate(event, ScoreType.DRAGON);
-            }
-        } else if (dead instanceof Player) {
-            if (this.random.nextDouble() <= 0.05) {
-                this.dropTemplate(event, ScoreType.PVP);
-            }
-        } else if (dead instanceof Warden && this.random.nextDouble() <= 0.5) {
-            this.dropTemplate(event, ScoreType.WARDEN);
         }
     }
 

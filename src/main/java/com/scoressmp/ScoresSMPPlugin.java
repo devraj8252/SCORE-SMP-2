@@ -27,6 +27,8 @@ extends JavaPlugin {
 
     public void onEnable() {
         instance = this;
+        this.saveDefaultConfig();
+        com.scoressmp.config.ConfigManager.load(this);
         this.getLogger().info("ScoresSMP initializing...");
         this.getCommand("scoressmp").setExecutor((CommandExecutor)new ScoresCommand());
         this.getCommand("scoressmp").setTabCompleter((TabCompleter)new ScoresCommand());

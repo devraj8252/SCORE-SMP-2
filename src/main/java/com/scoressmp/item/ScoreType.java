@@ -14,7 +14,7 @@ public enum ScoreType {
 
 
     public String getDisplayName() {
-        return this.name().charAt(0) + this.name().substring(1).toLowerCase() + " Score";
+        return com.scoressmp.config.ConfigManager.getDisplayName(this);
     }
 }
 

@@ -108,7 +108,7 @@ public class AbilityListener
                     + CooldownManager.getRemainingCooldown(p, ability) + "s");
             return;
         }
-        int duration = 200 * level;
+        int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "left_click", "duration_per_level", 200) * level;
         switch (type) {
             case FIRE: {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, duration, 0));
@@ -118,7 +118,9 @@ public class AbilityListener
             case WATER: {
                 p.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, duration, 0));
                 p.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, duration, 0));
-                p.setVelocity(p.getLocation().getDirection().multiply(2.0 + (level * 0.5)));
+                double baseVel = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "left_click", "velocity_multiplier_base", 2.0);
+                double perLevelVel = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "left_click", "velocity_multiplier_per_level", 0.5);
+                p.setVelocity(p.getLocation().getDirection().multiply(baseVel + (level * perLevelVel)));
                 p.sendMessage(String.valueOf(ChatColor.AQUA) + "Aqua Dash!");
                 break;
             }
@@ -166,57 +168,74 @@ public class AbilityListener
             }
         }
         p.playSound(p.getLocation(), Sound.ENTITY_ILLUSIONER_CAST_SPELL, 1.0f, 1.0f);
-        CooldownManager.setCooldown(p, ability, 30);
+        CooldownManager.setCooldown(p, ability, com.scoressmp.config.ConfigManager.getCooldown(type, "left_click"));
     }
 
     private void handleRightClick(Player p, ScoreType type, int level) {
         String ability = "RightClick_" + type.name();
         if (CooldownManager.isOnCooldown(p, ability)) {
+            p.sendMessage(String.valueOf(ChatColor.RED) + "Ability on cooldown: "
+                    + CooldownManager.getRemainingCooldown(p, ability) + "s");
             return;
         }
         switch (type) {
             case FIRE: {
                 Fireball fb = (Fireball) p.launchProjectile(Fireball.class);
-                fb.setYield(1.5f + (float) level * 0.5f);
+                double baseYield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield_base", 1.5);
+                double perLevelYield = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "yield_per_level", 0.5);
+                fb.setYield((float) (baseYield + (float) level * perLevelYield));
                 break;
             }
             case WATER: {
-                p.getWorld().getNearbyEntities(p.getLocation(), (double) (4 * level), (double) (4 * level),
-                        (double) (4 * level)).forEach(ent -> {
-                            if (ent instanceof LivingEntity && ent != p) {
-                                ((LivingEntity) ent).damage(6.0 * (double) level, (Entity) p);
-                                ent.setVelocity(new Vector(0, 1.5 + (level * 0.2), 0));
-                            }
-                        });
-                p.getWorld().spawnParticle(Particle.SPLASH, p.getLocation(), 100 * level, 2.0, 2.0, 2.0);
+                double range = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "range_per_level", 4.0) * level;
+                double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "damage_per_level", 6.0) * level;
+                double baseVelY = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_y_base", 1.5);
+                double perLevelVelY = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_y_per_level", 0.2);
+                int particleCount = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "particle_count_per_level", 100) * level;
+
+                p.getWorld().getNearbyEntities(p.getLocation(), range, range, range).forEach(ent -> {
+                    if (ent instanceof LivingEntity && ent != p) {
+                        ((LivingEntity) ent).damage(damage, (Entity) p);
+                        ent.setVelocity(new Vector(0, baseVelY + (level * perLevelVelY), 0));
+                    }
+                });
+                p.getWorld().spawnParticle(Particle.SPLASH, p.getLocation(), particleCount, 2.0, 2.0, 2.0);
                 p.playSound(p.getLocation(), Sound.ENTITY_GENERIC_SPLASH, 1.0f, 1.0f);
                 break;
             }
             case MINE: {
                 TNTPrimed tnt = (TNTPrimed) p.getWorld().spawn(p.getEyeLocation(), TNTPrimed.class);
-                tnt.setVelocity(p.getLocation().getDirection().multiply(1.5));
-                tnt.setFuseTicks(25);
+                double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 1.5);
+                int fuse = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "fuse_ticks", 25);
+                tnt.setVelocity(p.getLocation().getDirection().multiply(velMul));
+                tnt.setFuseTicks(fuse);
                 break;
             }
             case DRAGON: {
                 DragonFireball dfb = (DragonFireball) p.launchProjectile(DragonFireball.class);
-                dfb.setVelocity(p.getLocation().getDirection().multiply(1.5));
+                double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 1.5);
+                dfb.setVelocity(p.getLocation().getDirection().multiply(velMul));
                 break;
             }
             case PVP: {
-                p.getWorld().getNearbyEntities(p.getLocation().add(p.getLocation().getDirection().multiply(3)),
-                        (double) (3 * level), (double) (3 * level), (double) (3 * level)).forEach(ent -> {
-                            if (ent instanceof LivingEntity && ent != p) {
-                                ((LivingEntity) ent).damage(7.0 * (double) level, (Entity) p);
-                            }
-                        });
+                double range = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "range_per_level", 3.0) * level;
+                double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "damage_per_level", 7.0) * level;
+
+                p.getWorld().getNearbyEntities(p.getLocation().add(p.getLocation().getDirection().multiply(3)), range, range, range).forEach(ent -> {
+                    if (ent instanceof LivingEntity && ent != p) {
+                        ((LivingEntity) ent).damage(damage, (Entity) p);
+                    }
+                });
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
                 break;
             }
             case WARDEN: {
                 Location eye = p.getEyeLocation();
                 Vector dir = eye.getDirection();
-                for (int i = 0; i < 15 * level; ++i) {
+                int range = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "range_per_level", 15) * level;
+                double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "damage_per_level", 8.0) * level;
+
+                for (int i = 0; i < range; ++i) {
                     Location point = eye.clone().add(dir.clone().multiply(i));
                     try {
                         p.getWorld().spawnParticle(Particle.valueOf((String) "SONIC_BOOM"), point, 1);
@@ -225,7 +244,7 @@ public class AbilityListener
                     }
                     p.getWorld().getNearbyEntities(point, 1.5, 1.5, 1.5).forEach(ent -> {
                         if (ent instanceof LivingEntity && ent != p) {
-                            ((LivingEntity) ent).damage(8.0 * (double) level, (Entity) p);
+                            ((LivingEntity) ent).damage(damage, (Entity) p);
                         }
                     });
                 }
@@ -233,9 +252,12 @@ public class AbilityListener
                 break;
             }
             case HONOR: {
-                for (int i = 0; i < 10 * level; ++i) {
+                int arrowCount = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "arrows_per_level", 10) * level;
+                double velMul = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "right_click", "velocity_multiplier", 2.0);
+
+                for (int i = 0; i < arrowCount; ++i) {
                     Arrow arrow = (Arrow) p.launchProjectile(Arrow.class);
-                    arrow.setVelocity(p.getLocation().getDirection().multiply(2)
+                    arrow.setVelocity(p.getLocation().getDirection().multiply(velMul)
                             .add(Vector.getRandom().subtract(new Vector(0.5, 0.5, 0.5)).multiply(0.5)));
                     arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
                 }
@@ -246,7 +268,7 @@ public class AbilityListener
                 p.sendMessage(String.valueOf(ChatColor.GRAY) + "Ability specific complex logic placeholder triggered.");
             }
         }
-        CooldownManager.setCooldown(p, ability, 15);
+        CooldownManager.setCooldown(p, ability, com.scoressmp.config.ConfigManager.getCooldown(type, "right_click"));
     }
 
     private void handleShiftClick(Player p, ScoreType type, int level) {
@@ -259,70 +281,86 @@ public class AbilityListener
         switch (type) {
             case FIRE: {
                 Location loc = p.getLocation();
-                p.getWorld().getNearbyEntities(loc, (double) (5 * level), (double) (5 * level), (double) (5 * level))
+                double range = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "shift_click", "range_per_level", 5.0) * level;
+                int fireTicks = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "fire_ticks_per_level", 100) * level;
+
+                p.getWorld().getNearbyEntities(loc, range, range, range)
                         .forEach(ent -> {
                             if (ent != p && ent instanceof LivingEntity) {
-                                ent.setFireTicks(100 * level);
+                                ent.setFireTicks(fireTicks);
                             }
                         });
                 p.sendMessage(String.valueOf(ChatColor.GOLD) + "Ignited nearby enemies!");
                 break;
             }
             case WARDEN: {
-                p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 400 * level, level - 1));
+                int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "absorption_duration_per_level", 400) * level;
+                p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, duration, level - 1));
                 p.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + "Gained Absorption hearts!");
                 break;
             }
             case WATER: {
-                p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 200 * level, level));
+                int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "resistance_duration_per_level", 200) * level;
+                p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, level));
                 p.sendMessage(String.valueOf(ChatColor.AQUA) + "Water Shield activated! Gained Resistance.");
                 break;
             }
             case MINE: {
+                int particleCount = level;
+                double range = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "shift_click", "range_per_level", 4.0) * level;
+                double damage = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "shift_click", "damage_per_level", 10.0) * level;
+
                 try {
-                    p.getWorld().spawnParticle(Particle.valueOf((String) "EXPLOSION_HUGE"), p.getLocation(), level);
+                    p.getWorld().spawnParticle(Particle.valueOf((String) "EXPLOSION_HUGE"), p.getLocation(), particleCount);
                 } catch (Exception e) {
-                    p.getWorld().spawnParticle(Particle.EXPLOSION, p.getLocation(), level);
+                    p.getWorld().spawnParticle(Particle.EXPLOSION, p.getLocation(), particleCount);
                 }
                 p.playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
-                p.getWorld().getNearbyEntities(p.getLocation(), (double) (4 * level), (double) (4 * level),
-                        (double) (4 * level)).forEach(ent -> {
+                p.getWorld().getNearbyEntities(p.getLocation(), range, range, range).forEach(ent -> {
                             if (ent instanceof LivingEntity && ent != p) {
-                                ((LivingEntity) ent).damage(10.0 * (double) level, (Entity) p);
+                                ((LivingEntity) ent).damage(damage, (Entity) p);
                             }
                         });
                 p.sendMessage(String.valueOf(ChatColor.YELLOW) + "Safe Blast triggered!");
                 break;
             }
             case DRAGON: {
-                p.getWorld().getNearbyEntities(p.getLocation(), (double) (5 * level), (double) (5 * level),
-                        (double) (5 * level)).forEach(ent -> {
+                double range = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "shift_click", "range_per_level", 5.0) * level;
+                int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "levitation_duration_per_level", 100) * level;
+
+                p.getWorld().getNearbyEntities(p.getLocation(), range, range, range).forEach(ent -> {
                             if (ent instanceof LivingEntity && ent != p) {
                                 ((LivingEntity) ent).addPotionEffect(
-                                        new PotionEffect(PotionEffectType.LEVITATION, 100 * level, level));
+                                        new PotionEffect(PotionEffectType.LEVITATION, duration, level));
                             }
                         });
                 p.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + "Ground Trap activated! Enemies levitating.");
                 break;
             }
             case PVP: {
-                for (int i = 0; i < level * 2; ++i) {
+                int minionCount = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "minions_per_level", 2) * level;
+                int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "wolf_duration_per_level", 400) * level;
+
+                for (int i = 0; i < minionCount; ++i) {
                     Wolf wolf = (Wolf) p.getWorld().spawn(p.getLocation(), Wolf.class);
                     wolf.setOwner((AnimalTamer) p);
-                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 400 * level, 1));
-                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 400 * level, 1));
+                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, 1));
+                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, duration, 1));
                 }
                 p.sendMessage(String.valueOf(ChatColor.RED) + "Minions summoned!");
                 break;
             }
             case HONOR: {
-                p.getWorld().getNearbyEntities(p.getLocation(), (double) (10 * level), (double) (10 * level),
-                        (double) (10 * level)).forEach(ent -> {
+                double range = com.scoressmp.config.ConfigManager.getAbilityDouble(type, "shift_click", "range_per_level", 10.0) * level;
+                int blindness = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "blindness_duration_per_level", 200) * level;
+                int wither = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "wither_duration_per_level", 200) * level;
+
+                p.getWorld().getNearbyEntities(p.getLocation(), range, range, range).forEach(ent -> {
                             if (ent instanceof LivingEntity && ent != p) {
                                 LivingEntity le = (LivingEntity) ent;
-                                le.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200 * level, 0));
-                                le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 200 * level, level - 1));
-                                le.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 200 * level, 0));
+                                le.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, blindness, 0));
+                                le.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, wither, level - 1));
+                                le.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, blindness, 0));
                             }
                         });
                 try {
@@ -339,6 +377,6 @@ public class AbilityListener
                 p.sendMessage(String.valueOf(ChatColor.GRAY) + "Shift-click ultimate logic placeholder triggered.");
             }
         }
-        CooldownManager.setCooldown(p, ability, 60);
+        CooldownManager.setCooldown(p, ability, com.scoressmp.config.ConfigManager.getCooldown(type, "shift_click"));
     }
 }

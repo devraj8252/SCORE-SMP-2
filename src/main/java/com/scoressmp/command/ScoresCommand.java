@@ -39,6 +39,12 @@ public class ScoresCommand
         if (args.length == 0) {
             sender.sendMessage(String.valueOf(ChatColor.GOLD) + "ScoresSMP Admin Commands:");
             sender.sendMessage(String.valueOf(ChatColor.YELLOW) + "/scoressmp give <player> <type> <level|template>");
+            sender.sendMessage(String.valueOf(ChatColor.YELLOW) + "/scoressmp reload");
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("reload")) {
+            com.scoressmp.config.ConfigManager.reload();
+            sender.sendMessage(String.valueOf(ChatColor.GREEN) + "ScoresSMP configuration reloaded!");
             return true;
         }
         if (args[0].equalsIgnoreCase("give")) {
@@ -97,7 +103,7 @@ public class ScoresCommand
             return completions;
         }
         if (args.length == 1) {
-            List<String> subCommands = Arrays.asList("give");
+            List<String> subCommands = Arrays.asList("give", "reload");
             completions.addAll(
                     subCommands.stream().filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList()));
         } else if (args.length == 2 && args[0].equalsIgnoreCase("give")) {
