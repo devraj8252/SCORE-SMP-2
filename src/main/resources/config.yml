@@ -262,8 +262,10 @@ items:
     base_material: "LIME_DYE"
     base_model_data: 8000000
     recipe:
-      item1: "RABBIT_FOOT"
+      item1: "ENCHANTED_GOLDEN_APPLE"
       item2: "EMERALD_BLOCK"
+      item3: "DIAMOND_BLOCK"
+      item4: "TOTEM_OF_UNDYING"
     cooldowns:
       left_click: 30
       right_click: 15

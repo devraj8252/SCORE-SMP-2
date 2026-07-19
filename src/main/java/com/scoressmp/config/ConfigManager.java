@@ -165,10 +165,10 @@ public class ConfigManager {
                 case DRAGON -> Material.DRAGON_BREATH;
                 case PVP -> Material.GOLDEN_APPLE;
                 case WARDEN -> Material.ECHO_SHARD;
-                case LUCK -> Material.RABBIT_FOOT;
+                case LUCK -> Material.ENCHANTED_GOLDEN_APPLE;
                 default -> Material.AIR;
             };
-        } else {
+        } else if ("item2".equalsIgnoreCase(key) || "item".equalsIgnoreCase(key)) {
             return switch (type) {
                 case FIRE -> Material.MAGMA_CREAM;
                 case WATER -> Material.PRISMARINE_CRYSTALS;
@@ -179,7 +179,18 @@ public class ConfigManager {
                 case LUCK -> Material.EMERALD_BLOCK;
                 default -> Material.AIR;
             };
+        } else if ("item3".equalsIgnoreCase(key)) {
+            return switch (type) {
+                case LUCK -> Material.DIAMOND_BLOCK;
+                default -> Material.AIR;
+            };
+        } else if ("item4".equalsIgnoreCase(key)) {
+            return switch (type) {
+                case LUCK -> Material.TOTEM_OF_UNDYING;
+                default -> Material.AIR;
+            };
         }
+        return Material.AIR;
     }
 
     private static double getDefaultLootStructureChance(ScoreType type, String structure) {

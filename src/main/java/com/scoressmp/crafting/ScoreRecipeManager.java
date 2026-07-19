@@ -30,7 +30,7 @@ import org.bukkit.plugin.Plugin;
 public class ScoreRecipeManager {
     public static void registerRecipes(ScoresSMPPlugin plugin) {
         for (ScoreType type : ScoreType.values()) {
-            if (type == ScoreType.HONOR) continue;
+            if (type == ScoreType.HONOR || type == ScoreType.LUCK) continue;
             Material item1 = com.scoressmp.config.ConfigManager.getRecipeItem(type, "item1");
             Material item2 = com.scoressmp.config.ConfigManager.getRecipeItem(type, "item2");
             if (item1 != null && item1 != Material.AIR && item2 != null && item2 != Material.AIR) {
@@ -38,6 +38,27 @@ public class ScoreRecipeManager {
             }
         }
         ScoreRecipeManager.registerHonorRecipe(plugin);
+        ScoreRecipeManager.registerLuckRecipe(plugin);
+    }
+
+    private static void registerLuckRecipe(ScoresSMPPlugin plugin) {
+        NamespacedKey key = new NamespacedKey((Plugin)plugin, "luck_recipe");
+        ItemStack result = ScoreItemManager.createScoreWeapon(ScoreType.LUCK, 1);
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
+        recipe.shape(new String[]{" E ", "MTD", " U "});
+        
+        Material item1 = com.scoressmp.config.ConfigManager.getRecipeItem(ScoreType.LUCK, "item1");
+        Material item2 = com.scoressmp.config.ConfigManager.getRecipeItem(ScoreType.LUCK, "item2");
+        Material item3 = com.scoressmp.config.ConfigManager.getRecipeItem(ScoreType.LUCK, "item3");
+        Material item4 = com.scoressmp.config.ConfigManager.getRecipeItem(ScoreType.LUCK, "item4");
+        
+        recipe.setIngredient('E', (RecipeChoice)new RecipeChoice.MaterialChoice(item1));
+        recipe.setIngredient('M', (RecipeChoice)new RecipeChoice.MaterialChoice(item2));
+        recipe.setIngredient('T', (RecipeChoice)new RecipeChoice.ExactChoice(ScoreItemManager.createTemplate(ScoreType.LUCK)));
+        recipe.setIngredient('D', (RecipeChoice)new RecipeChoice.MaterialChoice(item3));
+        recipe.setIngredient('U', (RecipeChoice)new RecipeChoice.MaterialChoice(item4));
+        
+        Bukkit.addRecipe((Recipe)recipe);
     }
 
     private static void registerRecipe(ScoresSMPPlugin plugin, ScoreType type, Material item1, Material item2) {
