@@ -60,6 +60,7 @@ public class AbilityListener
         implements Listener {
     private final ScoresSMPPlugin plugin;
     private final java.util.Map<java.util.UUID, Long> lastRightClick = new java.util.HashMap<>();
+    public static final java.util.Set<java.util.UUID> activeJackpots = new java.util.HashSet<>();
 
     public AbilityListener(ScoresSMPPlugin plugin) {
         this.plugin = plugin;
@@ -189,6 +190,14 @@ public class AbilityListener
                 p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, 1));
                 p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 1));
                 p.sendMessage(String.valueOf(ChatColor.DARK_AQUA) + "Ultimate Buff applied!");
+                break;
+            }
+            case LUCK: {
+                int speedAmp = com.scoressmp.config.ConfigManager.getAbilityInt(type, "left_click", "speed_amplifier", 1);
+                p.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, duration, 0));
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, duration, speedAmp));
+                p.sendMessage(String.valueOf(ChatColor.GREEN) + "Lucky Boost applied!");
+                break;
             }
         }
         p.playSound(p.getLocation(), Sound.ENTITY_ILLUSIONER_CAST_SPELL, 1.0f, 1.0f);
@@ -356,6 +365,58 @@ public class AbilityListener
                 p.playSound(p.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1.0f, 1.0f);
                 break;
             }
+            case LUCK: {
+                int roll = new java.util.Random().nextInt(4) + 1;
+                int buffDuration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "buff_duration", 100);
+                
+                switch (roll) {
+                    case 1: {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, buffDuration, 1));
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, buffDuration, 1));
+                        p.sendMessage(String.valueOf(ChatColor.GREEN) + "☘ Fate Roll: You rolled a 1! Gained health & nourishment.");
+                        p.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, p.getLocation(), 30, 1.0, 1.0, 1.0, 0.1);
+                        break;
+                    }
+                    case 2: {
+                        int amount = com.scoressmp.config.ConfigManager.getAbilityInt(type, "right_click", "emerald_amount_per_level", 1) * level;
+                        p.getInventory().addItem(new ItemStack(org.bukkit.Material.EMERALD, amount));
+                        p.sendMessage(String.valueOf(ChatColor.GOLD) + "☘ Fate Roll: You rolled a 2! Emeralds spawned in your inventory.");
+                        p.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, p.getLocation(), 30, 1.0, 1.0, 1.0, 0.1);
+                        break;
+                    }
+                    case 3: {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, buffDuration, 1));
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, buffDuration, 0));
+                        p.sendMessage(String.valueOf(ChatColor.YELLOW) + "☘ Fate Roll: You rolled a 3! Shielded with Absorption & Resistance.");
+                        p.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, p.getLocation(), 30, 1.0, 1.0, 1.0, 0.1);
+                        break;
+                    }
+                    case 4: {
+                        double range = 10.0;
+                        org.bukkit.entity.Entity target = null;
+                        double closestDist = Double.MAX_VALUE;
+                        for (org.bukkit.entity.Entity ent : p.getNearbyEntities(range, range, range)) {
+                            if (ent instanceof LivingEntity && ent != p) {
+                                double dist = ent.getLocation().distance(p.getLocation());
+                                if (dist < closestDist) {
+                                    closestDist = dist;
+                                    target = ent;
+                                }
+                            }
+                        }
+                        if (target != null) {
+                            p.getWorld().strikeLightningEffect(target.getLocation());
+                            ((LivingEntity) target).damage(6.0 * level, (Entity) p);
+                            p.sendMessage(String.valueOf(ChatColor.AQUA) + "☘ Fate Roll: You rolled a 4! Lucky lightning struck a nearby enemy.");
+                        } else {
+                            p.sendMessage(String.valueOf(ChatColor.GREEN) + "☘ Fate Roll: You rolled a 4, but no enemies were nearby!");
+                        }
+                        break;
+                    }
+                }
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
+                break;
+            }
             default: {
                 p.sendMessage(String.valueOf(ChatColor.GRAY) + "Ability specific complex logic placeholder triggered.");
             }
@@ -465,10 +526,50 @@ public class AbilityListener
                 p.sendMessage(String.valueOf(ChatColor.DARK_AQUA) + "Shamak activated! Enemies blinded and withered.");
                 break;
             }
+            case LUCK: {
+                int duration = com.scoressmp.config.ConfigManager.getAbilityInt(type, "shift_click", "duration_per_level", 200) * level;
+                java.util.UUID uuid = p.getUniqueId();
+                activeJackpots.add(uuid);
+                p.sendMessage(String.valueOf(ChatColor.GOLD) + "✦ JACKPOT ACTIVATED! Mob drops and XP are doubled! ✦");
+                p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+                
+                new org.bukkit.scheduler.BukkitRunnable() {
+                    int elapsed = 0;
+                    @Override
+                    public void run() {
+                        if (!p.isOnline() || !activeJackpots.contains(uuid) || elapsed >= duration) {
+                            activeJackpots.remove(uuid);
+                            if (p.isOnline()) {
+                                p.sendMessage(String.valueOf(ChatColor.RED) + "✦ Jackpot has ended! ✦");
+                            }
+                            this.cancel();
+                            return;
+                        }
+                        p.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, p.getLocation().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0.05);
+                        elapsed += 10;
+                    }
+                }.runTaskTimer(plugin, 0L, 10L);
+                break;
+            }
             default: {
                 p.sendMessage(String.valueOf(ChatColor.GRAY) + "Shift-click ultimate logic placeholder triggered.");
             }
         }
         CooldownManager.setCooldown(p, ability, com.scoressmp.config.ConfigManager.getCooldown(type, "shift_click"));
+    }
+
+    @EventHandler
+    public void onEntityDeath(org.bukkit.event.entity.EntityDeathEvent event) {
+        LivingEntity dead = event.getEntity();
+        Player killer = dead.getKiller();
+        if (killer == null) {
+            return;
+        }
+        if (activeJackpots.contains(killer.getUniqueId())) {
+            killer.playSound(killer.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+            event.getDrops().forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * 2));
+            event.setDroppedExp(event.getDroppedExp() * 2);
+            dead.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, dead.getLocation(), 15, 0.5, 0.5, 0.5, 0.1);
+        }
     }
 }

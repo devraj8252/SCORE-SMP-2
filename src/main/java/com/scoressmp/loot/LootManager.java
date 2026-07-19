@@ -73,6 +73,7 @@ implements Listener {
             case MINE -> new String[]{"abandoned_mineshaft", "simple_dungeon"};
             case DRAGON -> new String[]{"end_city_treasure"};
             case WARDEN -> new String[]{"ancient_city"};
+            case LUCK -> new String[]{"village"};
             default -> new String[0];
         };
         for (String k : keys) {

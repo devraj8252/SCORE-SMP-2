@@ -10,7 +10,8 @@ public enum ScoreType {
     DRAGON,
     PVP,
     WARDEN,
-    HONOR;
+    HONOR,
+    LUCK;
 
 
     public String getDisplayName() {

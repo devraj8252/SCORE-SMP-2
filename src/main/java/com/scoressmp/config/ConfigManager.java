@@ -126,6 +126,7 @@ public class ConfigManager {
             case WARDEN -> Material.CYAN_DYE;
             case WATER -> Material.BLUE_DYE;
             case HONOR -> Material.GREEN_DYE;
+            case LUCK -> Material.LIME_DYE;
         };
     }
 
@@ -138,6 +139,7 @@ public class ConfigManager {
             case WARDEN -> 5000000;
             case WATER -> 6000000;
             case HONOR -> 7000000;
+            case LUCK -> 8000000;
         };
     }
 
@@ -150,6 +152,7 @@ public class ConfigManager {
             case PVP -> "Kill other Players.";
             case WARDEN -> "Kill Wardens or Shriekers.";
             case HONOR -> "";
+            case LUCK -> "Kill Rabbits or Mine Emeralds.";
         };
     }
 
@@ -162,6 +165,7 @@ public class ConfigManager {
                 case DRAGON -> Material.DRAGON_BREATH;
                 case PVP -> Material.GOLDEN_APPLE;
                 case WARDEN -> Material.ECHO_SHARD;
+                case LUCK -> Material.RABBIT_FOOT;
                 default -> Material.AIR;
             };
         } else {
@@ -172,6 +176,7 @@ public class ConfigManager {
                 case DRAGON -> Material.END_CRYSTAL;
                 case PVP -> Material.NETHERITE_SWORD;
                 case WARDEN -> Material.SCULK_CATALYST;
+                case LUCK -> Material.EMERALD_BLOCK;
                 default -> Material.AIR;
             };
         }
@@ -184,6 +189,7 @@ public class ConfigManager {
             case MINE -> 0.20; // abandoned_mineshaft, simple_dungeon
             case DRAGON -> 0.20; // end_city_treasure
             case WARDEN -> 0.20; // ancient_city
+            case LUCK -> 0.15; // villages
             default -> 0.0;
         };
     }
@@ -195,6 +201,7 @@ public class ConfigManager {
             case DRAGON -> 0.50; // ender_dragon
             case PVP -> 0.05; // player
             case WARDEN -> 0.50; // warden
+            case LUCK -> "rabbit".equalsIgnoreCase(entity) ? 0.10 : 0.0;
             default -> 0.0;
         };
     }
@@ -209,6 +216,7 @@ public class ConfigManager {
                 case PVP -> "Strength";
                 case WARDEN -> "Regeneration";
                 case HONOR -> "Ultimate Buff";
+                case LUCK -> "Lucky Boost";
             };
         } else if ("right_click".equalsIgnoreCase(click)) {
             return switch (type) {
@@ -219,6 +227,7 @@ public class ConfigManager {
                 case PVP -> "Giant Sword";
                 case WARDEN -> "Sonic Boom";
                 case HONOR -> "Arrow Swarm";
+                case LUCK -> "Fate Roll";
             };
         } else {
             return switch (type) {
@@ -229,6 +238,7 @@ public class ConfigManager {
                 case PVP -> "Summon Minions";
                 case WARDEN -> "Absorption Hearts";
                 case HONOR -> "Shamak";
+                case LUCK -> "Jackpot";
             };
         }
     }

@@ -256,3 +256,43 @@ items:
         range_per_level: 10.0
         blindness_duration_per_level: 200
         wither_duration_per_level: 200
+
+  LUCK:
+    display_name: "Luck Score"
+    base_material: "LIME_DYE"
+    base_model_data: 8000000
+    recipe:
+      item1: "RABBIT_FOOT"
+      item2: "EMERALD_BLOCK"
+    cooldowns:
+      left_click: 30
+      right_click: 15
+      shift_click: 60
+    abilities:
+      left_click:
+        name: "Lucky Boost"
+        duration_per_level: 200
+        speed_amplifier: 1
+      right_click:
+        name: "Fate Roll"
+        emerald_amount_per_level: 1
+        buff_duration: 100
+      shift_click:
+        name: "Jackpot"
+        duration_per_level: 200
+        drop_multiplier: 2
+    progression:
+      required_progress_lv1: 50
+      required_progress_lv2: 150
+      challenge_description: "Kill Rabbits or Mine Emeralds."
+      entities:
+        - "RABBIT"
+      blocks:
+        - "EMERALD_ORE"
+        - "DEEPSLATE_EMERALD_ORE"
+    loot:
+      structures:
+        village_desert_house: 0.15
+        village_plains_house: 0.15
+      entities:
+        RABBIT: 0.10
